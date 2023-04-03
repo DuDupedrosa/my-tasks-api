@@ -10,6 +10,7 @@ import { User } from 'src/users/models/users.model';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { getJWt } from 'src/utils/helpers/jwtHelper';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { CreateTaskModel } from './models/create-task.model';
 
 @Injectable()
 export class TasksService {
@@ -51,7 +52,7 @@ export class TasksService {
   }
 
   public async deleteTask(id: string) {
-    const task = await this.taskModel.findById(id);
+    const task: CreateTaskModel = await this.taskModel.findById(id);
 
     if (!task) {
       throw new NotFoundException(`The task not found.`);
@@ -59,7 +60,9 @@ export class TasksService {
 
     await this.taskModel.findByIdAndDelete(id);
 
-    throw new HttpException('Delete task with success', HttpStatus.OK);
+    return {
+      status: task.status,
+    };
   }
 
   public async getTaskById(id: string) {
@@ -81,6 +84,21 @@ export class TasksService {
     });
 
     return tasks;
+  }
+
+  public async checkAlreadyTask(authToken: string) {
+    const { userId } = await this.getUserId(authToken);
+    const task = await this.taskModel.findOne({ userId: userId });
+
+    if (!task) {
+      return {
+        alreadyTask: false,
+      };
+    }
+
+    return {
+      alreadyTask: true,
+    };
   }
 
   private getUserId(authToken: string) {

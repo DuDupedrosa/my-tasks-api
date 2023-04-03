@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   UseGuards,
@@ -43,6 +44,14 @@ export class TasksController {
   @UseGuards(AuthGuard('jwt'))
   public async delete(@Param('id') id: string) {
     return this.tasksService.deleteTask(id);
+  }
+
+  @Get('alreadytasks')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
+  public async checkAlreadyTask(@Headers('Authorization') authToken: string) {
+    console.log('%c⧭', 'color: #f200e2', 'bati aqui');
+    return this.tasksService.checkAlreadyTask(authToken);
   }
 
   @Get('pending')

@@ -11,6 +11,8 @@ import { UserSignInDto } from './dto/signin.dto';
 import { UserSignUpDto } from './dto/signup.dto';
 import { User, UserCreatedReturn } from './models/users.model';
 import * as bcrypt from 'bcrypt';
+import { getJWt } from 'src/utils/helpers/jwtHelper';
+import { UserEditDto } from './dto/userEdit.dto';
 
 @Injectable()
 export class UsersService {
@@ -78,6 +80,46 @@ export class UsersService {
     };
   }
 
+  public async getUser(authToken: string): Promise<{
+    name: string;
+    email: string;
+    _id: string;
+  }> {
+    const { userId } = await this.getUserId(authToken);
+    const user = await this.usersModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      email: user.email,
+      name: user.name,
+      _id: user._id,
+    };
+  }
+
+  public async userEdit(userEditDto: UserEditDto) {
+    const user = await this.usersModel.findById(userEditDto._id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // melhorar isso aqui
+    const userEdited = {
+      password: user.password,
+      name: userEditDto.name,
+      email: userEditDto.email,
+      _id: user._id,
+    };
+
+    console.log('paylad', userEdited);
+    await this.usersModel.findByIdAndUpdate(user._id, userEdited);
+
+    return userEditDto;
+  }
+
   private async findUserByEmail(email: string) {
     const user = this.usersModel.findOne({ email });
 
@@ -92,5 +134,9 @@ export class UsersService {
     const match = await bcrypt.compare(password, user.password);
 
     return match;
+  }
+
+  private getUserId(authToken: string) {
+    return getJWt(authToken);
   }
 }
