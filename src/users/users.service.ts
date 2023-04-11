@@ -106,7 +106,6 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // melhorar isso aqui
     const userEdited = {
       password: user.password,
       name: userEditDto.name,
@@ -114,7 +113,6 @@ export class UsersService {
       _id: user._id,
     };
 
-    console.log('paylad', userEdited);
     await this.usersModel.findByIdAndUpdate(user._id, userEdited);
 
     return userEditDto;

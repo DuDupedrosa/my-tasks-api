@@ -50,7 +50,6 @@ export class TasksController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'))
   public async checkAlreadyTask(@Headers('Authorization') authToken: string) {
-    console.log('%c⧭', 'color: #f200e2', 'bati aqui');
     return this.tasksService.checkAlreadyTask(authToken);
   }
 
