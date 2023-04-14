@@ -13,6 +13,7 @@ import { User, UserCreatedReturn } from './models/users.model';
 import * as bcrypt from 'bcrypt';
 import { getJWt } from 'src/utils/helpers/jwtHelper';
 import { UserEditDto } from './dto/userEdit.dto';
+import { EditPasswordDto } from './dto/editPassword.dto';
 
 @Injectable()
 export class UsersService {
@@ -116,6 +117,41 @@ export class UsersService {
     await this.usersModel.findByIdAndUpdate(user._id, userEdited);
 
     return userEditDto;
+  }
+
+  public async editPassword(
+    editPasswordDto: EditPasswordDto,
+    authToken: string,
+  ) {
+    const { userId } = await this.getUserId(authToken);
+    const user = await this.usersModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const checkPassword = await this.checkPassword(
+      editPasswordDto.currentPassword,
+      user,
+    );
+
+    if (!checkPassword) {
+      throw new HttpException(
+        'The current password is not correct',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const newPassword = await bcrypt.hash(editPasswordDto.newPassword, 10);
+
+    const userEdit = {
+      password: newPassword,
+      name: user.name,
+      email: user.email,
+      _id: user._id,
+    };
+
+    await this.usersModel.findByIdAndUpdate(user._id, userEdit);
   }
 
   private async findUserByEmail(email: string) {

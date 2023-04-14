@@ -14,6 +14,7 @@ import { UserSignUpDto } from './dto/signup.dto';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserEditDto } from './dto/userEdit.dto';
+import { EditPasswordDto } from './dto/editPassword.dto';
 
 @Controller('users')
 export class UsersController {
@@ -42,5 +43,15 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   public async getUser(@Headers('Authorization') authToken: string) {
     return this.usersService.getUser(authToken);
+  }
+
+  @Post('edit/password')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'))
+  public async editPassword(
+    @Body() editPasswordDto: EditPasswordDto,
+    @Headers('Authorization') authToken: string,
+  ) {
+    return this.usersService.editPassword(editPasswordDto, authToken);
   }
 }
